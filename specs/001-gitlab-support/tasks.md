@@ -110,31 +110,31 @@ User Story 1 (P1) ────┐
 
 ### Token Validation & Authentication
 
-- [ ] T017 [US1] Implement ValidateGitLabToken function in components/backend/gitlab/token.go
-- [ ] T018 [US1] Add GitLab /user API call with Bearer token auth in components/backend/gitlab/token.go
-- [ ] T019 [US1] Add token validation error handling (401, 403, 404) in components/backend/gitlab/token.go
-- [ ] T020 [US1] Add test API call validation (repository access check) in components/backend/gitlab/token.go
+- [X] T017 [US1] Implement ValidateGitLabToken function in components/backend/gitlab/token.go
+- [X] T018 [US1] Add GitLab /user API call with Bearer token auth in components/backend/gitlab/token.go
+- [X] T019 [US1] Add token validation error handling (401, 403, 404) in components/backend/gitlab/token.go
+- [X] T020 [US1] Add test API call validation (repository access check) in components/backend/gitlab/token.go
 
 ### Connection Management
 
-- [ ] T021 [P] [US1] Create ConfigMap helper for gitlab-connections in components/backend/k8s/configmap.go
-- [ ] T022 [P] [US1] Implement StoreGitLabConnection function in components/backend/gitlab/connection.go
-- [ ] T023 [P] [US1] Implement GetGitLabConnection function in components/backend/gitlab/connection.go
-- [ ] T024 [US1] Add connection metadata storage (userID, gitlabUserID, instanceURL) in components/backend/gitlab/connection.go
+- [X] T021 [P] [US1] Create ConfigMap helper for gitlab-connections in components/backend/k8s/configmap.go
+- [X] T022 [P] [US1] Implement StoreGitLabConnection function in components/backend/gitlab/connection.go
+- [X] T023 [P] [US1] Implement GetGitLabConnection function in components/backend/gitlab/connection.go
+- [X] T024 [US1] Add connection metadata storage (userID, gitlabUserID, instanceURL) in components/backend/gitlab/connection.go
 
 ### API Endpoints
 
-- [ ] T025 [P] [US1] Create POST /auth/gitlab/connect handler in components/backend/handlers/gitlab_auth.go
-- [ ] T026 [P] [US1] Create GET /auth/gitlab/status handler in components/backend/handlers/gitlab_auth.go
-- [ ] T027 [P] [US1] Create POST /auth/gitlab/disconnect handler in components/backend/handlers/gitlab_auth.go
-- [ ] T028 [US1] Register GitLab auth routes in components/backend/routes.go
+- [X] T025 [P] [US1] Create POST /auth/gitlab/connect handler in components/backend/handlers/gitlab_auth.go
+- [X] T026 [P] [US1] Create GET /auth/gitlab/status handler in components/backend/handlers/gitlab_auth.go
+- [X] T027 [P] [US1] Create POST /auth/gitlab/disconnect handler in components/backend/handlers/gitlab_auth.go
+- [X] T028 [US1] Register GitLab auth routes in components/backend/routes.go
 
 ### Project Configuration
 
-- [ ] T029 [P] [US1] Update project creation handler to support GitLab URLs in components/backend/handlers/projects.go
-- [ ] T030 [P] [US1] Add provider detection in project creation flow in components/backend/handlers/projects.go
-- [ ] T031 [US1] Add GitLab repository validation on project save in components/backend/handlers/projects.go
-- [ ] T032 [US1] Update project settings API to return provider information in components/backend/handlers/projects.go
+- [X] T029 [P] [US1] Update project creation handler to support GitLab URLs in components/backend/handlers/repository.go
+- [X] T030 [P] [US1] Add provider detection in project creation flow in components/backend/handlers/repository.go
+- [X] T031 [US1] Add GitLab repository validation on project save in components/backend/handlers/repository.go
+- [X] T032 [US1] Update project settings API to return provider information in components/backend/handlers/repository.go
 
 **Parallel Execution Example**:
 ```bash
