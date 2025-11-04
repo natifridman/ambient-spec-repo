@@ -1,0 +1,431 @@
+openapi: 3.0.3
+info:
+  title: vTeam GitLab Repository API
+  description: API endpoints for browsing GitLab repository contents (branches, files, directory tree)
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://vteam-backend.example.com
+    description: Production
+
+paths:
+  /projects/{projectName}/repo/branches:
+    get:
+      summary: List repository branches
+      description: |
+        Retrieve all branches from a GitLab repository. Automatically detects provider
+        (GitHub or GitLab) based on repository URL and routes accordingly.
+      operationId: listBranches
+      tags:
+        - Repository Browsing
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: projectName
+          in: path
+          required: true
+          description: vTeam project name
+          schema:
+            type: string
+            example: my-project
+        - name: repoUrl
+          in: query
+          required: false
+          description: |
+            Repository URL to list branches from. If omitted, uses the project's
+            configured umbrella repository. Supports both GitHub and GitLab URLs.
+          schema:
+            type: string
+            format: uri
+            example: https://gitlab.com/org/backend.git
+      responses:
+        '200':
+          description: List of branches
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BranchListResponse'
+              examples:
+                gitlab_branches:
+                  summary: GitLab repository branches
+                  value:
+                    branches:
+                      - name: main
+                        commit:
+                          id: a1b2c3d4e5f6
+                          shortId: a1b2c3d
+                          title: "feat: add GitLab support"
+                          authorName: John Doe
+                          committedDate: "2025-11-04T10:15:00Z"
+                        protected: true
+                        default: true
+                      - name: develop
+                        commit:
+                          id: f6e5d4c3b2a1
+                          shortId: f6e5d4c
+                          title: "chore: update dependencies"
+                          authorName: Jane Smith
+                          committedDate: "2025-11-03T14:20:00Z"
+                        protected: false
+                        default: false
+        '401':
+          description: Unauthorized or missing GitLab token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Repository not found or project not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: GitLab API rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitErrorResponse'
+
+  /projects/{projectName}/repo/tree:
+    get:
+      summary: Browse repository directory tree
+      description: |
+        Retrieve the directory tree structure for a specific path in a GitLab repository.
+        Returns files and subdirectories at the specified path.
+      operationId: getRepositoryTree
+      tags:
+        - Repository Browsing
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: projectName
+          in: path
+          required: true
+          description: vTeam project name
+          schema:
+            type: string
+            example: my-project
+        - name: repoUrl
+          in: query
+          required: true
+          description: Repository URL
+          schema:
+            type: string
+            format: uri
+            example: https://gitlab.com/org/backend.git
+        - name: branch
+          in: query
+          required: true
+          description: Branch name
+          schema:
+            type: string
+            example: main
+        - name: path
+          in: query
+          required: false
+          description: Path within repository (defaults to root)
+          schema:
+            type: string
+            example: src/components
+            default: /
+      responses:
+        '200':
+          description: Directory tree entries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TreeResponse'
+              examples:
+                root_directory:
+                  summary: Root directory listing
+                  value:
+                    entries:
+                      - id: abc123
+                        name: README.md
+                        type: blob
+                        path: README.md
+                        mode: "100644"
+                      - id: def456
+                        name: src
+                        type: tree
+                        path: src
+                        mode: "040000"
+                      - id: ghi789
+                        name: .gitlab-ci.yml
+                        type: blob
+                        path: .gitlab-ci.yml
+                        mode: "100644"
+        '404':
+          description: Path not found or repository not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /projects/{projectName}/repo/blob:
+    get:
+      summary: Read file contents
+      description: |
+        Retrieve the raw contents of a specific file from a GitLab repository.
+      operationId: getFileContents
+      tags:
+        - Repository Browsing
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: projectName
+          in: path
+          required: true
+          description: vTeam project name
+          schema:
+            type: string
+            example: my-project
+        - name: repoUrl
+          in: query
+          required: true
+          description: Repository URL
+          schema:
+            type: string
+            format: uri
+            example: https://gitlab.com/org/backend.git
+        - name: branch
+          in: query
+          required: true
+          description: Branch name
+          schema:
+            type: string
+            example: main
+        - name: path
+          in: query
+          required: true
+          description: File path within repository
+          schema:
+            type: string
+            example: src/main.go
+      responses:
+        '200':
+          description: File contents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileContentsResponse'
+              examples:
+                go_file:
+                  summary: Go source file
+                  value:
+                    content: "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello GitLab\")\n}\n"
+                    path: src/main.go
+                    size: 78
+                    encoding: utf-8
+        '404':
+          description: File not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                not_found:
+                  summary: File does not exist
+                  value:
+                    error: File 'src/missing.go' not found in repository at branch 'main'. Verify the file path and branch name.
+                    statusCode: 404
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    BranchListResponse:
+      type: object
+      required:
+        - branches
+      properties:
+        branches:
+          type: array
+          items:
+            $ref: '#/components/schemas/Branch'
+
+    Branch:
+      type: object
+      required:
+        - name
+        - commit
+        - protected
+        - default
+      properties:
+        name:
+          type: string
+          description: Branch name
+          example: main
+        commit:
+          $ref: '#/components/schemas/Commit'
+        protected:
+          type: boolean
+          description: Whether branch is protected from force push
+          example: true
+        default:
+          type: boolean
+          description: Whether this is the repository's default branch
+          example: true
+
+    Commit:
+      type: object
+      required:
+        - id
+        - shortId
+        - title
+        - authorName
+        - committedDate
+      properties:
+        id:
+          type: string
+          description: Full commit SHA
+          example: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0
+        shortId:
+          type: string
+          description: Short commit SHA
+          example: a1b2c3d
+        title:
+          type: string
+          description: Commit title (first line of message)
+          example: "feat: add GitLab support"
+        message:
+          type: string
+          description: Full commit message (optional)
+          example: "feat: add GitLab support\n\nImplement GitLab integration..."
+        authorName:
+          type: string
+          description: Commit author name
+          example: John Doe
+        authorEmail:
+          type: string
+          format: email
+          description: Commit author email (optional)
+          example: john.doe@example.com
+        committedDate:
+          type: string
+          format: date-time
+          description: Commit timestamp
+          example: "2025-11-04T10:15:00Z"
+
+    TreeResponse:
+      type: object
+      required:
+        - entries
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/TreeEntry'
+        path:
+          type: string
+          description: Current path in tree
+          example: src/components
+
+    TreeEntry:
+      type: object
+      required:
+        - id
+        - name
+        - type
+        - path
+        - mode
+      properties:
+        id:
+          type: string
+          description: Object SHA (blob or tree)
+          example: abc123def456
+        name:
+          type: string
+          description: File or directory name
+          example: README.md
+        type:
+          type: string
+          enum: [blob, tree]
+          description: Entry type (blob=file, tree=directory)
+          example: blob
+        path:
+          type: string
+          description: Full path from repository root
+          example: docs/README.md
+        mode:
+          type: string
+          description: File mode (Unix permissions)
+          example: "100644"
+
+    FileContentsResponse:
+      type: object
+      required:
+        - content
+        - path
+        - size
+      properties:
+        content:
+          type: string
+          description: Raw file contents (UTF-8 text)
+          example: "package main\n\nfunc main() { ... }"
+        path:
+          type: string
+          description: File path
+          example: src/main.go
+        size:
+          type: integer
+          description: File size in bytes
+          example: 1024
+        encoding:
+          type: string
+          description: Content encoding
+          example: utf-8
+          default: utf-8
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - statusCode
+      properties:
+        error:
+          type: string
+          description: User-friendly error message with remediation
+          example: GitLab repository not found. Verify the URL and your access permissions.
+        statusCode:
+          type: integer
+          example: 404
+        requestId:
+          type: string
+          description: Request ID for debugging
+          example: req-xyz789
+
+    RateLimitErrorResponse:
+      type: object
+      required:
+        - error
+        - statusCode
+        - retryAfter
+      properties:
+        error:
+          type: string
+          description: Rate limit error message
+          example: GitLab API rate limit exceeded. Please wait 45 seconds before retrying.
+        statusCode:
+          type: integer
+          example: 429
+        retryAfter:
+          type: integer
+          description: Seconds until rate limit resets
+          example: 45
+        resetTime:
+          type: string
+          format: date-time
+          description: Absolute time when rate limit resets
+          example: "2025-11-04T11:00:00Z"
+
+tags:
+  - name: Repository Browsing
+    description: Endpoints for browsing GitLab repository contents

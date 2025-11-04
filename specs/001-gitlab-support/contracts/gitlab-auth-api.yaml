@@ -1,0 +1,306 @@
+openapi: 3.0.3
+info:
+  title: vTeam GitLab Authentication API
+  description: API endpoints for managing GitLab account connections and authentication
+  version: 1.0.0
+  contact:
+    name: vTeam API Support
+
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://vteam-backend.example.com
+    description: Production
+
+paths:
+  /auth/gitlab/connect:
+    post:
+      summary: Connect GitLab account
+      description: |
+        Connect a user's GitLab account by providing a Personal Access Token.
+        Validates the token, stores connection metadata, and returns user information.
+      operationId: connectGitLab
+      tags:
+        - GitLab Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectGitLabRequest'
+            examples:
+              gitlab_com:
+                summary: Connect to GitLab.com
+                value:
+                  personalAccessToken: glpat-AbCdEfGhIjKlMnOp
+                  instanceUrl: https://gitlab.com
+              self_hosted:
+                summary: Connect to self-hosted GitLab
+                value:
+                  personalAccessToken: glpat-XyZaBcDeFgHiJkLm
+                  instanceUrl: https://gitlab.company.com
+      responses:
+        '200':
+          description: GitLab account connected successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectGitLabResponse'
+              examples:
+                success:
+                  summary: Successful connection
+                  value:
+                    userId: user-123
+                    gitlabUserId: "456"
+                    username: johndoe
+                    instanceUrl: https://gitlab.com
+                    connected: true
+                    message: GitLab account connected successfully
+        '401':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_token:
+                  summary: Invalid token
+                  value:
+                    error: GitLab token is invalid or expired. Please generate a new Personal Access Token with required scopes (api, read_repository, write_repository) and try again.
+                    statusCode: 401
+        '403':
+          description: Token lacks required permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                insufficient_scopes:
+                  summary: Insufficient token scopes
+                  value:
+                    error: GitLab token lacks required permissions. Ensure your token has 'api' and 'read_repository' scopes and try again.
+                    statusCode: 403
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                server_error:
+                  summary: Server error
+                  value:
+                    error: Failed to connect GitLab account due to an internal error. Please try again or contact support.
+                    statusCode: 500
+
+  /auth/gitlab/status:
+    get:
+      summary: Get GitLab connection status
+      description: |
+        Check if the current user has a connected GitLab account and retrieve
+        connection metadata.
+      operationId: getGitLabStatus
+      tags:
+        - GitLab Authentication
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: GitLab connection status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitLabStatusResponse'
+              examples:
+                connected:
+                  summary: User has GitLab connected
+                  value:
+                    connected: true
+                    instanceUrl: https://gitlab.com
+                    gitlabUserId: "456"
+                    username: johndoe
+                    updatedAt: "2025-11-04T10:30:00Z"
+                not_connected:
+                  summary: User does not have GitLab connected
+                  value:
+                    connected: false
+        '401':
+          description: Unauthorized - invalid or missing session token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/gitlab/disconnect:
+    post:
+      summary: Disconnect GitLab account
+      description: |
+        Remove the user's GitLab connection, deleting stored tokens and metadata.
+        This action is irreversible.
+      operationId: disconnectGitLab
+      tags:
+        - GitLab Authentication
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: GitLab account disconnected successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DisconnectGitLabResponse'
+              examples:
+                success:
+                  summary: Successful disconnection
+                  value:
+                    message: GitLab account disconnected successfully
+                    connected: false
+        '404':
+          description: No GitLab connection found for user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                not_found:
+                  summary: No connection to disconnect
+                  value:
+                    error: No GitLab connection found for this user
+                    statusCode: 404
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: vTeam session token (obtained via user authentication)
+
+  schemas:
+    ConnectGitLabRequest:
+      type: object
+      required:
+        - personalAccessToken
+      properties:
+        personalAccessToken:
+          type: string
+          description: GitLab Personal Access Token with required scopes
+          example: glpat-AbCdEfGhIjKlMnOp
+          pattern: '^(glpat-|gitlab-ci-token)'
+          minLength: 20
+        instanceUrl:
+          type: string
+          format: uri
+          description: |
+            GitLab instance URL. Defaults to https://gitlab.com if not provided.
+            For self-hosted instances, provide the full URL (e.g., https://gitlab.company.com)
+          example: https://gitlab.com
+          default: https://gitlab.com
+
+    ConnectGitLabResponse:
+      type: object
+      required:
+        - userId
+        - gitlabUserId
+        - username
+        - instanceUrl
+        - connected
+        - message
+      properties:
+        userId:
+          type: string
+          description: vTeam user identifier
+          example: user-123
+        gitlabUserId:
+          type: string
+          description: GitLab user ID
+          example: "456"
+        username:
+          type: string
+          description: GitLab username
+          example: johndoe
+        instanceUrl:
+          type: string
+          format: uri
+          description: GitLab instance URL
+          example: https://gitlab.com
+        connected:
+          type: boolean
+          description: Connection status
+          example: true
+        message:
+          type: string
+          description: Success message
+          example: GitLab account connected successfully
+
+    GitLabStatusResponse:
+      type: object
+      required:
+        - connected
+      properties:
+        connected:
+          type: boolean
+          description: Whether user has GitLab connected
+          example: true
+        instanceUrl:
+          type: string
+          format: uri
+          description: GitLab instance URL (only if connected)
+          example: https://gitlab.com
+        gitlabUserId:
+          type: string
+          description: GitLab user ID (only if connected)
+          example: "456"
+        username:
+          type: string
+          description: GitLab username (only if connected)
+          example: johndoe
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last connection update timestamp (only if connected)
+          example: "2025-11-04T10:30:00Z"
+
+    DisconnectGitLabResponse:
+      type: object
+      required:
+        - message
+        - connected
+      properties:
+        message:
+          type: string
+          description: Success message
+          example: GitLab account disconnected successfully
+        connected:
+          type: boolean
+          description: Connection status after disconnection
+          example: false
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - statusCode
+      properties:
+        error:
+          type: string
+          description: User-friendly error message with remediation guidance
+          example: GitLab token is invalid or expired. Please generate a new token and try again.
+        statusCode:
+          type: integer
+          description: HTTP status code
+          example: 401
+        requestId:
+          type: string
+          description: Request ID for debugging (optional)
+          example: req-abc123
+
+tags:
+  - name: GitLab Authentication
+    description: Endpoints for managing GitLab account connections
