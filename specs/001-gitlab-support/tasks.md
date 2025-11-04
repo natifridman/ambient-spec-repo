@@ -64,12 +64,12 @@ User Story 1 (P1) ────┐
 
 **Tasks** (6):
 
-- [ ] T001 Create gitlab package directory structure in components/backend/gitlab/
-- [ ] T002 Add GitLab package imports to components/backend/main.go
-- [ ] T003 [P] Create types for GitLabConnection in components/backend/types/gitlab.go
-- [ ] T004 [P] Create types for GitLabRepository in components/backend/types/gitlab.go
-- [ ] T005 [P] Create types for GitLabAPIError in components/backend/types/gitlab.go
-- [ ] T006 [P] Create ProviderType enum in components/backend/types/provider.go
+- [X] T001 Create gitlab package directory structure in components/backend/gitlab/
+- [X] T002 Add GitLab package imports to components/backend/main.go
+- [X] T003 [P] Create types for GitLabConnection in components/backend/types/gitlab.go
+- [X] T004 [P] Create types for GitLabRepository in components/backend/types/gitlab.go
+- [X] T005 [P] Create types for GitLabAPIError in components/backend/types/gitlab.go
+- [X] T006 [P] Create ProviderType enum in components/backend/types/provider.go
 
 ---
 
@@ -79,16 +79,16 @@ User Story 1 (P1) ────┐
 
 **Tasks** (10):
 
-- [ ] T007 Implement URL parser for GitLab repositories in components/backend/gitlab/parser.go
-- [ ] T008 Add URL normalization logic (HTTPS/SSH, .git suffix) in components/backend/gitlab/parser.go
-- [ ] T009 Add self-hosted instance detection in components/backend/gitlab/parser.go
-- [ ] T010 Add API URL construction logic in components/backend/gitlab/parser.go
-- [ ] T011 [P] Create GitLab HTTP client with 15-second timeout in components/backend/gitlab/client.go
-- [ ] T012 [P] Add error response parsing and GitLabAPIError mapping in components/backend/gitlab/client.go
-- [ ] T013 [P] Add provider detection function in components/backend/types/provider.go
-- [ ] T014 [P] Create Kubernetes Secret helper for PAT storage in components/backend/k8s/secrets.go
-- [ ] T015 [P] Add logging utilities with token redaction in components/backend/gitlab/logger.go
-- [ ] T016 [P] Update ProjectSettings CRD with optional provider field in components/manifests/crds/projectsettings.yaml
+- [X] T007 Implement URL parser for GitLab repositories in components/backend/gitlab/parser.go
+- [X] T008 Add URL normalization logic (HTTPS/SSH, .git suffix) in components/backend/gitlab/parser.go
+- [X] T009 Add self-hosted instance detection in components/backend/gitlab/parser.go
+- [X] T010 Add API URL construction logic in components/backend/gitlab/parser.go
+- [X] T011 [P] Create GitLab HTTP client with 15-second timeout in components/backend/gitlab/client.go
+- [X] T012 [P] Add error response parsing and GitLabAPIError mapping in components/backend/gitlab/client.go
+- [X] T013 [P] Add provider detection function in components/backend/types/provider.go
+- [X] T014 [P] Create Kubernetes Secret helper for PAT storage in components/backend/k8s/secrets.go
+- [X] T015 [P] Add logging utilities with token redaction in components/backend/gitlab/logger.go
+- [X] T016 [P] Update ProjectSettings CRD with optional provider field in components/manifests/crds/projectsettings.yaml
 
 ---
 
