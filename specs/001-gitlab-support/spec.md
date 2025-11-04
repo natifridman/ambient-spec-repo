@@ -5,6 +5,16 @@
 **Status**: Draft
 **Input**: User description: "Add GitLab support to the vTeam project. Currently supports only GitHub"
 
+## Clarifications
+
+### Session 2025-11-04
+
+- Q: What level of observability (logging, metrics, tracing) should be implemented for GitLab integration operations? → A: Match current pattern - Use standard library logging (log.Printf / fmt.Printf) for GitLab operations, logging only warnings and critical errors
+- Q: What retry strategy should be used for transient GitLab API failures (network errors, timeouts, 5xx responses)? → A: Match GitHub implementation - No automatic retries, use 15-second HTTP client timeout, fail immediately and return errors to user
+- Q: How should GitLab PATs be protected in transit and at runtime within AgenticSession pods? → A: Match GitHub implementation - Store in Kubernetes Secret referenced by ProjectSettings, inject via EnvFrom as environment variables and mount as read-only volume at /var/run/runner-secrets/, use security context with all capabilities dropped and privilege escalation disabled
+- Q: How should the system handle GitLab API rate limit errors (HTTP 429)? → A: Match GitHub implementation - Treat 429 responses like any other error, fail immediately without parsing rate limit headers, return error response body to user
+- Q: Should GitLab tokens with scopes exceeding minimum requirements (e.g., full api scope instead of read_api + read_repository) be accepted or rejected? → A: Match GitHub implementation - No scope inspection or validation, validate tokens by attempting test API call (access user info or repository), accept any token that successfully authenticates regardless of granted scopes
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Configure vTeam Project with GitLab Repository (Priority: P1)
@@ -19,8 +29,8 @@ A developer wants to use the Ambient Code Platform with their GitLab-hosted repo
 
 1. **Given** a user has a GitLab.com repository, **When** they create a vTeam project with the URL `https://gitlab.com/owner/repo.git` and store a valid PAT in runner secrets, **Then** the system successfully validates the repository and displays it as configured
 2. **Given** a user has a self-hosted GitLab instance, **When** they configure a project with `https://gitlab.company.com/team/repo.git`, **Then** the system detects the self-hosted instance and constructs the correct API URL (`https://gitlab.company.com/api/v4`)
-3. **Given** a user provides an invalid GitLab PAT, **When** the system attempts validation, **Then** the system displays a clear error message indicating the token is invalid and provides guidance on creating a valid token
-4. **Given** a user provides a GitLab PAT with insufficient permissions, **When** the system validates the token, **Then** the system displays an error indicating which scopes are missing and how to update the token
+3. **Given** a user provides an invalid GitLab PAT, **When** the system attempts validation via test API call, **Then** the system displays a clear error message indicating the token is invalid and provides guidance on creating a valid token
+4. **Given** a user provides a GitLab PAT with insufficient permissions to access the repository, **When** the system validates the token via test API call, **Then** the system displays an error indicating the token cannot access the repository
 
 ---
 
@@ -38,7 +48,7 @@ A user with a configured GitLab project wants to browse their repository's file 
 2. **Given** a configured GitLab project and a specific branch, **When** a user browses the root directory, **Then** the system displays the directory tree structure with files and folders
 3. **Given** a user is browsing a GitLab repository, **When** they select a specific file, **Then** the system retrieves and displays the file contents accurately
 4. **Given** a large GitLab repository with many branches or files, **When** the system retrieves the data, **Then** the system correctly handles API pagination and returns complete results
-5. **Given** a GitLab API rate limit is reached, **When** the user attempts to browse, **Then** the system displays a clear error message indicating the rate limit and when it will reset
+5. **Given** a GitLab API rate limit is reached, **When** the user attempts to browse, **Then** the system returns an error with GitLab's response body indicating the rate limit was exceeded
 
 ---
 
@@ -55,7 +65,7 @@ A developer wants to create an AgenticSession that can clone their GitLab reposi
 1. **Given** a configured GitLab project with valid write permissions, **When** a user creates an AgenticSession with a code modification task, **Then** the system successfully clones the GitLab repository using token authentication
 2. **Given** an AgenticSession has cloned a GitLab repository, **When** the AI agent makes code changes and commits, **Then** the commit is created successfully in the local repository
 3. **Given** an AgenticSession has committed changes, **When** the system pushes to GitLab, **Then** the changes appear in the GitLab repository and are visible in the GitLab UI
-4. **Given** an AgenticSession attempts to push with a token lacking write permissions, **When** the push fails, **Then** the system returns a clear error message indicating the missing `write_repository` scope and how to fix it
+4. **Given** an AgenticSession attempts to push with a token lacking write permissions, **When** the push fails due to GitLab 403 Forbidden response, **Then** the system returns a clear error message indicating insufficient permissions and guidance on ensuring the token has write_repository scope
 5. **Given** an AgenticSession is working with a self-hosted GitLab instance, **When** Git operations are performed, **Then** the system correctly constructs authentication URLs with the self-hosted domain
 6. **Given** a user completes an AgenticSession with GitLab, **When** they receive the completion notification, **Then** the notification includes a direct link to the branch in GitLab
 
@@ -103,7 +113,7 @@ A user creates a new vTeam project with a GitLab repository that lacks the requi
 
 - **What happens when a self-hosted GitLab instance uses a non-standard API port?** System must correctly parse URLs like `https://gitlab.company.com:8443/owner/repo.git` and construct API URLs as `https://gitlab.company.com:8443/api/v4`.
 
-- **How does the system behave when a GitLab API call times out due to network issues?** System must implement appropriate timeouts, retry logic for transient failures, and clear error messages indicating network connectivity problems.
+- **How does the system behave when a GitLab API call times out due to network issues?** System must use a 15-second HTTP client timeout (matching GitHub implementation), fail immediately without retries, and return clear error messages indicating network connectivity problems or timeout occurred.
 
 - **What happens when a user's GitLab PAT expires mid-session?** System must detect authentication failures during operations and provide clear messages indicating token expiration and how to update it.
 
@@ -127,11 +137,11 @@ A user creates a new vTeam project with a GitLab repository that lacks the requi
 
 - **FR-003**: System MUST construct correct API base URLs for self-hosted GitLab instances (e.g., `https://gitlab.company.com/api/v4`) when provided with repository URLs
 
-- **FR-004**: System MUST store GitLab Personal Access Tokens securely in Kubernetes Secrets as part of project runner secrets
+- **FR-004**: System MUST store GitLab Personal Access Tokens securely in Kubernetes Secrets referenced by ProjectSettings CR, inject tokens into runner pods via EnvFrom as environment variables and mount as read-only volume at /var/run/runner-secrets/, and configure pod security context to drop all capabilities and disable privilege escalation
 
-- **FR-005**: System MUST validate GitLab tokens have minimum required scopes (`read_api`, `read_repository`) during project configuration
+- **FR-005**: System MUST validate GitLab tokens during project configuration by attempting a test API call (e.g., GET /user or repository access), accepting any token that successfully authenticates regardless of scopes granted (document minimum recommended scopes as read_api, read_repository for reference)
 
-- **FR-006**: System MUST validate GitLab tokens have `write_repository` scope before allowing AgenticSessions that will perform push operations
+- **FR-006**: System SHOULD document that write_repository scope is required for AgenticSessions performing push operations, but validation is access-based (push failures will surface permission errors from GitLab API at runtime)
 
 - **FR-007**: System MUST retrieve branch lists from GitLab repositories via GitLab API v4 (`/projects/:id/repository/branches`)
 
@@ -161,13 +171,15 @@ A user creates a new vTeam project with a GitLab repository that lacks the requi
 
 - **FR-020**: System MUST normalize GitLab repository URLs to a consistent internal format regardless of input format (HTTPS/SSH, with/without .git)
 
-- **FR-021**: System MUST detect and handle GitLab API rate limits (300 requests/minute for authenticated users on GitLab.com)
+- **FR-021**: System MUST treat GitLab API rate limit errors (HTTP 429) like other API errors, fail immediately, and return GitLab's error response body to users (GitLab.com has 300 requests/minute limit for authenticated users)
 
 - **FR-022**: System MUST support GitLab API v4 endpoints for all required operations
 
 - **FR-023**: System MUST encode GitLab project paths correctly when constructing API URLs (handling special characters, slashes, etc.)
 
-- **FR-024**: System MUST implement appropriate timeouts for GitLab API calls to prevent indefinite waiting
+- **FR-024**: System MUST configure GitLab HTTP client with 15-second timeout matching GitHub implementation, fail immediately on timeout or network errors without automatic retries, and return clear error messages to users
+
+- **FR-025**: System MUST log GitLab operations using Go standard library logging (log.Printf / fmt.Printf) consistent with existing GitHub integration, logging warnings for configuration issues and critical errors for operation failures
 
 ### Key Entities
 
@@ -201,7 +213,7 @@ A user creates a new vTeam project with a GitLab repository that lacks the requi
 
 - **SC-008**: System correctly handles GitLab API pagination for repositories with up to 10,000 files and 500 branches without timeouts or memory issues
 
-- **SC-009**: Token validation during project configuration catches 95%+ of permission and scope issues before users attempt to use AgenticSessions
+- **SC-009**: Token validation during project configuration catches 95%+ of authentication and repository access issues before users attempt to use AgenticSessions (via test API calls)
 
 - **SC-010**: Repository seeding operations for GitLab repositories complete in under 2 minutes for typical template sizes (under 100 files)
 
