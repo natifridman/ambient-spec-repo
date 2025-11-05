@@ -225,30 +225,30 @@ User Story 1 (P1) ────┐
 
 ### GitLab API Client Methods
 
-- [ ] T047 [P] [US2] Implement GetBranches with pagination in components/backend/gitlab/client.go
-- [ ] T048 [P] [US2] Implement GetTree with pagination in components/backend/gitlab/client.go
-- [ ] T049 [P] [US2] Implement GetFileContents in components/backend/gitlab/client.go
-- [ ] T050 [P] [US2] Add pagination helper (handle X-Next-Page headers) in components/backend/gitlab/client.go
-- [ ] T051 [P] [US2] Add rate limit error handling (429) in components/backend/gitlab/client.go
+- [X] T047 [P] [US2] Implement GetBranches with pagination in components/backend/gitlab/client.go
+- [X] T048 [P] [US2] Implement GetTree with pagination in components/backend/gitlab/client.go
+- [X] T049 [P] [US2] Implement GetFileContents in components/backend/gitlab/client.go
+- [X] T050 [P] [US2] Add pagination helper (handle X-Next-Page headers) in components/backend/gitlab/client.go
+- [X] T051 [P] [US2] Add rate limit error handling (429) in components/backend/gitlab/client.go
 
 ### API Endpoints
 
-- [ ] T052 [P] [US2] Create GET /projects/:project/repo/branches handler in components/backend/handlers/repo.go
-- [ ] T053 [P] [US2] Create GET /projects/:project/repo/tree handler in components/backend/handlers/repo.go
-- [ ] T054 [P] [US2] Create GET /projects/:project/repo/blob handler in components/backend/handlers/repo.go
-- [ ] T055 [US2] Add provider detection and routing in repo handlers in components/backend/handlers/repo.go
+- [X] T052 [P] [US2] Create GET /projects/:project/repo/branches handler in components/backend/handlers/repo.go
+- [X] T053 [P] [US2] Create GET /projects/:project/repo/tree handler in components/backend/handlers/repo.go
+- [X] T054 [P] [US2] Create GET /projects/:project/repo/blob handler in components/backend/handlers/repo.go
+- [X] T055 [US2] Add provider detection and routing in repo handlers in components/backend/handlers/repo.go
 
 ### Response Mapping
 
-- [ ] T056 [P] [US2] Map GitLabBranch to common Branch type in components/backend/types/repository.go
-- [ ] T057 [P] [US2] Map GitLabTreeEntry to common TreeEntry type in components/backend/types/repository.go
-- [ ] T058 [P] [US2] Add project ID URL encoding for GitLab API in components/backend/gitlab/parser.go
+- [X] T056 [P] [US2] Map GitLabBranch to common Branch type in components/backend/types/repository.go
+- [X] T057 [P] [US2] Map GitLabTreeEntry to common TreeEntry type in components/backend/types/repository.go
+- [X] T058 [P] [US2] Add project ID URL encoding for GitLab API in components/backend/gitlab/parser.go
 
 ### Error Handling
 
-- [ ] T059 [P] [US2] Add specific error messages for browsing failures in components/backend/gitlab/client.go
-- [ ] T060 [P] [US2] Add remediation guidance for common browsing errors in components/backend/gitlab/client.go
-- [ ] T061 [US2] Register repository browsing routes in components/backend/routes.go
+- [X] T059 [P] [US2] Add specific error messages for browsing failures in components/backend/gitlab/client.go
+- [X] T060 [P] [US2] Add remediation guidance for common browsing errors in components/backend/gitlab/client.go
+- [X] T061 [US2] Register repository browsing routes in components/backend/routes.go
 
 **Parallel Execution Example**:
 ```bash
@@ -281,21 +281,21 @@ User Story 1 (P1) ────┐
 
 ### Multi-Provider Support
 
-- [ ] T062 [P] [US4] Add support for mixed repository arrays in ProjectSettings in components/backend/types/project.go
-- [ ] T063 [P] [US4] Update provider detection to handle multiple repos in components/backend/handlers/projects.go
-- [ ] T064 [US4] Add per-repository token routing logic in components/backend/git/operations.go
+- [X] T062 [P] [US4] Add support for mixed repository arrays in ProjectSettings in components/backend/types/project.go
+- [X] T063 [P] [US4] Update provider detection to handle multiple repos in components/backend/handlers/projects.go
+- [X] T064 [US4] Add per-repository token routing logic in components/backend/git/operations.go
 
 ### AgenticSession Updates
 
-- [ ] T065 [P] [US4] Update session clone logic to handle multiple providers in components/backend/git/operations.go
-- [ ] T066 [P] [US4] Add provider-specific error aggregation in components/backend/handlers/sessions.go
-- [ ] T067 [US4] Update session status reporting with per-provider results in components/backend/handlers/sessions.go
+- [X] T065 [P] [US4] Update session clone logic to handle multiple providers in components/backend/git/operations.go
+- [X] T066 [P] [US4] Add provider-specific error aggregation in components/backend/handlers/sessions.go
+- [X] T067 [US4] Update session status reporting with per-provider results in components/backend/handlers/sessions.go
 
 ### Error Handling
 
-- [ ] T068 [P] [US4] Add mixed-provider error messages in components/backend/types/errors.go
-- [ ] T069 [P] [US4] Add provider failure indication in session results in components/backend/handlers/sessions.go
-- [ ] T070 [US4] Add provider-specific remediation guidance in components/backend/types/errors.go
+- [X] T068 [P] [US4] Add mixed-provider error messages in components/backend/types/errors.go
+- [X] T069 [P] [US4] Add provider failure indication in session results in components/backend/handlers/sessions.go
+- [X] T070 [US4] Add provider-specific remediation guidance in components/backend/types/errors.go
 
 **Parallel Execution Example**:
 ```bash
@@ -361,16 +361,16 @@ User Story 1 (P1) ────┐
 
 ### Logging & Observability
 
-- [ ] T079 [P] Add standardized logging for all GitLab API calls in components/backend/gitlab/client.go
-- [ ] T080 [P] Add token redaction in all log statements in components/backend/gitlab/logger.go
-- [ ] T081 [P] Add request ID tracking for debugging in components/backend/gitlab/client.go
+- [X] T079 [P] Add standardized logging for all GitLab API calls in components/backend/gitlab/client.go
+- [X] T080 [P] Add token redaction in all log statements in components/backend/gitlab/logger.go
+- [X] T081 [P] Add request ID tracking for debugging in components/backend/gitlab/client.go
 
 ### Documentation
 
-- [ ] T082 [P] Create GitLab integration user guide in docs/gitlab-integration.md
-- [ ] T083 [P] Create GitLab PAT setup instructions in docs/gitlab-token-setup.md
-- [ ] T084 [P] Create self-hosted GitLab configuration guide in docs/gitlab-self-hosted.md
-- [ ] T085 [P] Update main README with GitLab support announcement in README.md
+- [X] T082 [P] Create GitLab integration user guide in docs/gitlab-integration.md
+- [X] T083 [P] Create GitLab PAT setup instructions in docs/gitlab-token-setup.md
+- [X] T084 [P] Create self-hosted GitLab configuration guide in docs/gitlab-self-hosted.md
+- [X] T085 [P] Update main README with GitLab support announcement in README.md
 
 ### Testing
 
