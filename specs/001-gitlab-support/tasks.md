@@ -169,29 +169,29 @@ User Story 1 (P1) ────┐
 
 ### Git Operations Integration
 
-- [ ] T033 [P] [US3] Add GitLab token retrieval in components/backend/git/operations.go
-- [ ] T034 [P] [US3] Implement token injection for GitLab URLs (oauth2:TOKEN@) in components/backend/git/operations.go
-- [ ] T035 [US3] Add provider routing logic (GitHub vs GitLab) in components/backend/git/operations.go
-- [ ] T036 [US3] Update clone operation to support GitLab in components/backend/git/operations.go
+- [X] T033 [P] [US3] Add GitLab token retrieval in components/backend/git/operations.go
+- [X] T034 [P] [US3] Implement token injection for GitLab URLs (oauth2:TOKEN@) in components/backend/git/operations.go
+- [X] T035 [US3] Add provider routing logic (GitHub vs GitLab) in components/backend/git/operations.go
+- [X] T036 [US3] Update clone operation to support GitLab in components/backend/git/operations.go
 
 ### Runner Pod Configuration
 
-- [ ] T037 [P] [US3] Update AgenticSession operator to inject GitLab PAT from Secrets in components/operator/internal/handlers/sessions.go
-- [ ] T038 [P] [US3] Add EnvFrom configuration for runner-secrets in components/operator/internal/handlers/sessions.go
-- [ ] T039 [P] [US3] Add volume mount for /var/run/runner-secrets/ in components/operator/internal/handlers/sessions.go
-- [ ] T040 [US3] Update security context (drop all capabilities) in components/operator/internal/handlers/sessions.go
+- [X] T037 [P] [US3] Update AgenticSession operator to inject GitLab PAT from Secrets in components/operator/internal/handlers/sessions.go
+- [X] T038 [P] [US3] Add EnvFrom configuration for runner-secrets in components/operator/internal/handlers/sessions.go
+- [X] T039 [P] [US3] Add volume mount for /var/run/runner-secrets/ in components/operator/internal/handlers/sessions.go
+- [X] T040 [US3] Update security context (drop all capabilities) in components/operator/internal/handlers/sessions.go
 
 ### Push Operations & Error Handling
 
-- [ ] T041 [P] [US3] Implement push error detection (403 Forbidden) in components/backend/git/operations.go
-- [ ] T042 [P] [US3] Add user-friendly error messages for permission failures in components/backend/git/operations.go
-- [ ] T043 [US3] Add self-hosted GitLab URL construction for push operations in components/backend/git/operations.go
+- [X] T041 [P] [US3] Implement push error detection (403 Forbidden) in components/backend/git/operations.go
+- [X] T042 [P] [US3] Add user-friendly error messages for permission failures in components/backend/git/operations.go
+- [X] T043 [US3] Add self-hosted GitLab URL construction for push operations in components/backend/git/operations.go
 
 ### Completion Notifications
 
-- [ ] T044 [P] [US3] Add GitLab branch URL construction in components/backend/handlers/sessions.go
-- [ ] T045 [P] [US3] Update session completion notification with GitLab link in components/backend/handlers/sessions.go
-- [ ] T046 [US3] Add provider-specific notification templates in components/backend/handlers/sessions.go
+- [X] T044 [P] [US3] Add GitLab branch URL construction in components/backend/git/operations.go
+- [X] T045 [P] [US3] Update session completion notification with GitLab link in components/backend/git/operations.go
+- [X] T046 [US3] Add provider-specific notification templates in components/backend/git/operations.go
 
 **Parallel Execution Example**:
 ```bash
