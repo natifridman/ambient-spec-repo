@@ -328,20 +328,20 @@ User Story 1 (P1) ────┐
 
 ### Repository Seeding Logic
 
-- [ ] T071 [P] [US5] Implement DetectMissingStructure function in components/backend/handlers/repo_seed.go
-- [ ] T072 [P] [US5] Implement SeedRepository function in components/backend/handlers/repo_seed.go
-- [ ] T073 [US5] Add template copy logic for .claude/ structure in components/backend/handlers/repo_seed.go
+- [X] T071 [P] [US5] Implement DetectMissingStructure function in components/backend/handlers/repo_seed.go
+- [X] T072 [P] [US5] Implement SeedRepository function in components/backend/handlers/repo_seed.go
+- [X] T073 [US5] Add template copy logic for .claude/ structure in components/backend/handlers/repo_seed.go
 
 ### API Endpoints
 
-- [ ] T074 [P] [US5] Create POST /projects/:project/repo/seed handler in components/backend/handlers/repo_seed.go
-- [ ] T075 [P] [US5] Create GET /projects/:project/repo/seed-status handler in components/backend/handlers/repo_seed.go
-- [ ] T076 [US5] Register repository seeding routes in components/backend/routes.go
+- [X] T074 [P] [US5] Create POST /projects/:project/repo/seed handler in components/backend/handlers/repo_seed.go
+- [X] T075 [P] [US5] Create GET /projects/:project/repo/seed-status handler in components/backend/handlers/repo_seed.go
+- [X] T076 [US5] Register repository seeding routes in components/backend/routes.go
 
 ### Error Handling
 
-- [ ] T077 [P] [US5] Add seeding error messages with permission guidance in components/backend/handlers/repo_seed.go
-- [ ] T078 [US5] Add seeding progress tracking and status updates in components/backend/handlers/repo_seed.go
+- [X] T077 [P] [US5] Add seeding error messages with permission guidance in components/backend/handlers/repo_seed.go
+- [X] T078 [US5] Add seeding progress tracking and status updates in components/backend/handlers/repo_seed.go
 
 **Parallel Execution Example**:
 ```bash
